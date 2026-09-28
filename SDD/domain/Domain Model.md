@@ -121,6 +121,7 @@ Es la clase base para los diferentes roles definidos en el sistema.
 | documentoIdentidad | Cadena | Documento de identidad del usuario. |
 | nombreCompleto | Cadena | Nombre completo del usuario. |
 | correoElectronico | Cadena | Correo electrónico del usuario. |
+| contrasena | Cadena | Credencial de acceso. Se almacena únicamente el valor hasheado, nunca el texto plano. SUPUESTO: la Restricción RG-01 exige operar autenticado, lo que implica almacenar credenciales, aunque el documento fuente no las enumere entre los atributos del usuario. |
 | rol | RolUsuario | Rol asignado al usuario dentro del sistema. |
 | estado | EstadoUsuario | Estado del usuario dentro del sistema. |
 | fechaRegistro | Fecha | Fecha en la que se registra el usuario. |
@@ -226,6 +227,7 @@ El sistema distingue entre bodegas del Marketplace y bodegas de vendedores.
 
 | Atributo | Tipo | Descripción |
 |---|---|---|
+| identificador | Cadena | Identificador único de la bodega. El inventario se vincula al par (producto, bodega), por lo que debe ser único. |
 | tipoBodega | TipoBodega | Indica si la bodega pertenece al Marketplace o a un Vendedor. |
 | vendedorPropietario | Vendedor | Vendedor propietario cuando corresponde. |
 | ubicacion | Cadena | Ubicación de la bodega. |
@@ -251,6 +253,9 @@ Los productos pueden ser físicos o digitales.
 
 | Atributo | Tipo | Descripción |
 |---|---|---|
+| identificador | Cadena | Identificador único del producto dentro del catálogo. |
+| nombre | Cadena | Nombre comercial del producto. |
+| vendedor | Vendedor | Vendedor propietario del producto. Sostiene la Restricción RG-03: un vendedor solo administra su propio catálogo. |
 | tipoProducto | TipoProducto | Indica si el producto es Físico o Digital. |
 | variantes | Lista | Lista de variantes del producto, como color, talla o modelo. |
 | estado | EstadoProducto | Estado del producto: Publicado, Suspendido o Descontinuado. |
@@ -384,6 +389,7 @@ El pedido pasa por diferentes estados durante su ciclo de vida.
 
 | Atributo | Tipo | Descripción |
 |---|---|---|
+| identificador | Cadena | Identificador único del pedido. Es referenciado por su Factura, sus Envíos y sus Devoluciones. |
 | comprador | Comprador | Comprador que realiza el pedido. |
 | estado | EstadoPedido | Estado actual del pedido. |
 | fechaCreacion | Fecha | Fecha de creación del pedido. |
@@ -407,6 +413,8 @@ Carrito
 → Entregado/Finalizado
 ```
 
+La etapa "Carrito" se modela como la entidad Carrito con su propio estado, porque tiene atributos y comportamiento distintos a los del Pedido. La equivalencia es: un Carrito ACTIVO corresponde a la etapa "Carrito", y el Pedido nace en estado "Pendiente de Pago" cuando el carrito se convierte. Por eso EstadoPedido no declara un valor "Carrito".
+
 ### Regla
 
 Un pedido finalizado no puede modificarse.
@@ -427,6 +435,7 @@ Representa un producto que forma parte de un Pedido.
 | producto | Producto | Producto comprado. |
 | cantidad | Entero | Cantidad comprada. |
 | precioUnitario | Decimal | Precio del producto en el momento de la compra. |
+| bodega | Bodega | Bodega cuyo inventario sirvió la línea. Nula para productos digitales, que no consumen inventario. SUPUESTO: el inventario distribuido obliga a registrar el origen de cada línea para poder registrar la salida por venta y planear el envío. |
 
 ### Relaciones
 
