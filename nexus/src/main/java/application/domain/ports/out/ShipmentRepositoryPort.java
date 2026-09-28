@@ -28,4 +28,6 @@ public interface ShipmentRepositoryPort {
     List<Shipment> findAllByStatus(ShipmentStatus shipmentStatus);
 
     List<Shipment> findAllByLogisticsOperator(LogisticsOperator logisticsOperator);
+
+    List<Shipment> findAll();
 }

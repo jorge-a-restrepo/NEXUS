@@ -48,4 +48,9 @@ public class ConsultShipmentService {
         authorizeAdministrativeConsultationService.execute(user);
         return shipmentRepositoryPort.findAllByStatus(shipmentStatus);
     }
+
+    public List<Shipment> executeAll(User user) {
+        authorizeAdministrativeConsultationService.execute(user);
+        return shipmentRepositoryPort.findAll();
+    }
 }

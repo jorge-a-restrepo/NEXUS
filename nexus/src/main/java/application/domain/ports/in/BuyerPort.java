@@ -40,7 +40,11 @@ public interface BuyerPort {
 
     Cart removeItemFromCart(User user, CartItem cartItem);
 
-    Order checkoutCart(User user, Cart cart);
+    /**
+     * The active cart is resolved from the authenticated buyer, so it is never
+     * supplied by the caller.
+     */
+    Order checkoutCart(User user);
 
     // Orders
 

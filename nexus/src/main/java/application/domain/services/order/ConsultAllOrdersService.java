@@ -3,6 +3,7 @@ package application.domain.services.order;
 import application.domain.Order;
 import application.domain.OrderStatus;
 import application.domain.User;
+import application.domain.exceptions.EntityNotFoundException;
 import application.domain.ports.out.OrderRepositoryPort;
 import application.domain.services.authorization.AuthorizeAdministrativeConsultationService;
 import application.domain.services.authorization.AuthorizeLogisticsOperatorOperationService;
@@ -37,6 +38,12 @@ public class ConsultAllOrdersService {
     public List<Order> execute(User user) {
         authorizeAdministrativeConsultationService.execute(user);
         return orderRepositoryPort.findAll();
+    }
+
+    public Order executeByIdentifier(User user, Order order) {
+        authorizeAdministrativeConsultationService.execute(user);
+        return orderRepositoryPort.findByIdentifier(order)
+                .orElseThrow(() -> new EntityNotFoundException("Order"));
     }
 
     public List<Order> executeOrdersToDispatch(User user) {

@@ -28,4 +28,6 @@ public interface InventoryRepositoryPort {
     List<Inventory> findAllByProduct(Product product);
 
     List<Inventory> findAllByWarehouse(Warehouse warehouse);
+
+    List<Inventory> findAll();
 }

@@ -17,6 +17,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Order {
 
+    /**
+     * Unique identifier of the order. The order is the formal commercial
+     * commitment of Domain 7 and is referenced by its invoice, its shipments and
+     * its return requests, so it needs an identity of its own.
+     */
+    private String identifier;
     private Buyer buyer;
     private OrderStatus status;
 }

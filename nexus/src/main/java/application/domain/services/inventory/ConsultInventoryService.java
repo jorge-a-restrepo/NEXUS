@@ -6,6 +6,7 @@ import application.domain.User;
 import application.domain.Warehouse;
 import application.domain.exceptions.EntityNotFoundException;
 import application.domain.ports.out.InventoryRepositoryPort;
+import application.domain.services.authorization.AuthorizeAdministrativeConsultationService;
 import application.domain.services.authorization.AuthorizeInventoryOperationService;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +24,23 @@ public class ConsultInventoryService {
 
     private final InventoryRepositoryPort inventoryRepositoryPort;
     private final AuthorizeInventoryOperationService authorizeInventoryOperationService;
+    private final AuthorizeAdministrativeConsultationService authorizeAdministrativeConsultationService;
 
     public ConsultInventoryService(InventoryRepositoryPort inventoryRepositoryPort,
-                                   AuthorizeInventoryOperationService authorizeInventoryOperationService) {
+                                   AuthorizeInventoryOperationService authorizeInventoryOperationService,
+                                   AuthorizeAdministrativeConsultationService authorizeAdministrativeConsultationService) {
         this.inventoryRepositoryPort = inventoryRepositoryPort;
         this.authorizeInventoryOperationService = authorizeInventoryOperationService;
+        this.authorizeAdministrativeConsultationService = authorizeAdministrativeConsultationService;
+    }
+
+    /**
+     * Consolidated inventory view for the administrator and the supervisor
+     * (OBJ-06, OBJ-12). It is read-only and never alters stock.
+     */
+    public List<Inventory> executeConsolidated(User user) {
+        authorizeAdministrativeConsultationService.execute(user);
+        return inventoryRepositoryPort.findAll();
     }
 
     public List<Inventory> executeByWarehouse(User user, Warehouse warehouse) {
