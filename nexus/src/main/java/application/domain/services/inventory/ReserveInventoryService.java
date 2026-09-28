@@ -3,6 +3,7 @@ package application.domain.services.inventory;
 import application.domain.Inventory;
 import application.domain.MovementType;
 import application.domain.Product;
+import application.domain.StockStatus;
 import application.domain.User;
 import application.domain.exceptions.DomainException;
 import application.domain.exceptions.EntityNotFoundException;
@@ -25,15 +26,9 @@ import java.util.List;
  * This service is invoked by the checkout flow on behalf of a buyer, so it does
  * not perform role authorization: the calling service already authorized the
  * buyer.
- *
- * SUPUESTO: stockStatus is still an open String in the domain model, so the
- * damaged condition is compared against the literal "DAMAGED". It must become a
- * bounded value object.
  */
 @Service
 public class ReserveInventoryService {
-
-    private static final String DAMAGED_STOCK = "DAMAGED";
 
     private final InventoryRepositoryPort inventoryRepositoryPort;
     private final RegisterInventoryMovementService registerInventoryMovementService;
@@ -75,7 +70,7 @@ public class ReserveInventoryService {
     }
 
     private boolean isDamaged(Inventory inventory) {
-        return inventory.getStockStatus() != null && DAMAGED_STOCK.equalsIgnoreCase(inventory.getStockStatus());
+        return StockStatus.DAMAGED.equals(inventory.getStockStatus());
     }
 
     private int availableQuantity(Inventory inventory) {

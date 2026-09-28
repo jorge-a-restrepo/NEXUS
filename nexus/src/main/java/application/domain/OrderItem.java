@@ -24,4 +24,10 @@ public class OrderItem {
     private Product product;
     private Integer quantity;
     private BigDecimal unitPrice;
+    /**
+     * Warehouse whose inventory served this line. Domain 6 distributes stock
+     * across warehouses, so the line must record where it was taken from in
+     * order to register the sale outflow and to plan the shipment.
+     */
+    private Warehouse warehouse;
 }

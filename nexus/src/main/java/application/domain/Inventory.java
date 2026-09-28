@@ -22,5 +22,5 @@ public class Inventory {
     private Product product;
     private Warehouse warehouse;
     private Integer availableQuantity;
-    private String stockStatus;
+    private StockStatus stockStatus;
 }

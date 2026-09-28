@@ -4,6 +4,7 @@ import application.domain.Inventory;
 import application.domain.InventoryMovement;
 import application.domain.MovementType;
 import application.domain.Product;
+import application.domain.StockStatus;
 import application.domain.User;
 import application.domain.Warehouse;
 import application.domain.exceptions.DomainException;
@@ -60,7 +61,8 @@ public class RegisterInventoryInflowService {
             inventory.setProduct(product);
             inventory.setWarehouse(warehouse);
             inventory.setAvailableQuantity(quantity);
-            inventory.setStockStatus(inventoryMovement.getInventory().getStockStatus());
+            StockStatus stockStatus = inventoryMovement.getInventory().getStockStatus();
+            inventory.setStockStatus(stockStatus == null ? StockStatus.AVAILABLE : stockStatus);
             inventory = inventoryRepositoryPort.save(inventory);
         }
         registerInventoryMovementService.execute(inventory, MovementType.INBOUND, quantity, user);

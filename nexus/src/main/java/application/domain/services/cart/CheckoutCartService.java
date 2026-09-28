@@ -4,10 +4,12 @@ import application.domain.Buyer;
 import application.domain.Cart;
 import application.domain.CartItem;
 import application.domain.CartStatus;
+import application.domain.Inventory;
 import application.domain.Order;
 import application.domain.OrderItem;
 import application.domain.OrderStatus;
 import application.domain.Product;
+import application.domain.ProductType;
 import application.domain.User;
 import application.domain.exceptions.DomainException;
 import application.domain.exceptions.EntityNotFoundException;
@@ -20,6 +22,7 @@ import application.domain.services.authorization.ValidateBuyerOwnershipService;
 import application.domain.services.inventory.ReserveInventoryService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,9 +41,10 @@ import java.util.Optional;
  *    time, so later catalog price changes do not alter closed orders;
  * 5. the cart is marked as CONVERTED and can no longer be modified.
  *
- * SUPUESTO: the reservation resolves the warehouse internally, but OrderItem
- * does not record which warehouse served each line. That association is needed
- * to register the sale outflow and to plan shipments precisely.
+ * Only physical products consume inventory: Domain 5 states digital products
+ * are delivered immediately after payment, so they are never reserved. Each
+ * physical line records the warehouse that served it, which is what later
+ * allows registering the sale outflow and planning the shipment.
  */
 @Service
 public class CheckoutCartService {
@@ -84,23 +88,32 @@ public class CheckoutCartService {
         if (cartItems == null || cartItems.isEmpty()) {
             throw new DomainException("The cart does not contain any product.");
         }
-        for (CartItem cartItem : cartItems) {
-            reserveInventoryService.execute(user, cartItem.getProduct(), cartItem.getQuantity());
-        }
-        Order order = new Order();
-        order.setBuyer(buyer);
-        order.setStatus(OrderStatus.PENDING_PAYMENT);
-        Order storedOrder = orderRepositoryPort.save(order);
+        List<Inventory> reservations = new ArrayList<>();
         for (CartItem cartItem : cartItems) {
             Product product = cartItem.getProduct();
             if (product == null) {
                 throw new EntityNotFoundException("Product of the cart item");
             }
+            if (ProductType.PHYSICAL.equals(product.getProductType())) {
+                reservations.add(reserveInventoryService.execute(user, product, cartItem.getQuantity()));
+            } else {
+                reservations.add(null);
+            }
+        }
+        Order order = new Order();
+        order.setBuyer(buyer);
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
+        Order storedOrder = orderRepositoryPort.save(order);
+        for (int index = 0; index < cartItems.size(); index++) {
+            CartItem cartItem = cartItems.get(index);
+            Product product = cartItem.getProduct();
+            Inventory reservation = reservations.get(index);
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(storedOrder);
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setUnitPrice(product.getBasePrice());
+            orderItem.setWarehouse(reservation == null ? null : reservation.getWarehouse());
             orderItemRepositoryPort.save(orderItem);
         }
         cart.setStatus(CartStatus.CONVERTED);

@@ -20,5 +20,5 @@ public class Buyer extends User {
 
     private String mainAddress;
     private List<String> additionalAddresses;
-    private String commercialStatus;
+    private CommercialStatus commercialStatus;
 }

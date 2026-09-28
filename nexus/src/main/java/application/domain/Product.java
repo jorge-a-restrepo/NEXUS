@@ -24,6 +24,12 @@ public class Product {
 
     private String identifier;
     private String name;
+    /**
+     * Seller that owns and commercializes this product. Domain 3 makes the
+     * seller responsible for registering and administering its own products,
+     * and RG-03 forbids acting over products of another participant.
+     */
+    private Seller seller;
     private ProductType productType;
     private List<String> variants;
     private ProductStatus status;

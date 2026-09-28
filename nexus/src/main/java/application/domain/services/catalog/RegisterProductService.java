@@ -54,7 +54,7 @@ public class RegisterProductService {
         if (productRepositoryPort.existsByIdentifier(product)) {
             throw new DomainException("A product with the same identifier already exists.");
         }
-        // SUPUESTO: ownership cannot be persisted until Product references its Seller.
+        product.setSeller(seller);
         product.setStatus(ProductStatus.SUSPENDED);
         return productRepositoryPort.save(product);
     }

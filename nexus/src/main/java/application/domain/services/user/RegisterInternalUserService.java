@@ -4,6 +4,7 @@ import application.domain.User;
 import application.domain.UserRole;
 import application.domain.UserStatus;
 import application.domain.exceptions.DomainException;
+import application.domain.ports.out.PasswordServicePort;
 import application.domain.ports.out.UserRepositoryPort;
 import application.domain.services.authorization.AuthorizeAdministratorOperationService;
 import org.springframework.stereotype.Service;
@@ -22,11 +23,14 @@ import org.springframework.stereotype.Service;
 public class RegisterInternalUserService {
 
     private final UserRepositoryPort userRepositoryPort;
+    private final PasswordServicePort passwordServicePort;
     private final AuthorizeAdministratorOperationService authorizeAdministratorOperationService;
 
     public RegisterInternalUserService(UserRepositoryPort userRepositoryPort,
+                                       PasswordServicePort passwordServicePort,
                                        AuthorizeAdministratorOperationService authorizeAdministratorOperationService) {
         this.userRepositoryPort = userRepositoryPort;
+        this.passwordServicePort = passwordServicePort;
         this.authorizeAdministratorOperationService = authorizeAdministratorOperationService;
     }
 
@@ -44,6 +48,9 @@ public class RegisterInternalUserService {
         if (newUser.getIdentityDocument() == null || newUser.getIdentityDocument().isBlank()) {
             throw new DomainException("Identity document must be provided.");
         }
+        if (newUser.getPassword() == null || newUser.getPassword().isBlank()) {
+            throw new DomainException("A password must be provided.");
+        }
         UserRole role = newUser.getRole();
         if (role == null) {
             throw new DomainException("A role must be assigned to the new user.");
@@ -58,6 +65,7 @@ public class RegisterInternalUserService {
         if (userRepositoryPort.existsByIdentityDocument(newUser)) {
             throw new DomainException("The identity document is already registered in the platform.");
         }
+        newUser.setPassword(passwordServicePort.hash(newUser.getPassword()));
         newUser.setStatus(UserStatus.ACTIVE);
         return userRepositoryPort.save(newUser);
     }

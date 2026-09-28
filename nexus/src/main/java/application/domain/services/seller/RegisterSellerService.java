@@ -7,6 +7,7 @@ import application.domain.UserStatus;
 import application.domain.Warehouse;
 import application.domain.WarehouseType;
 import application.domain.exceptions.DomainException;
+import application.domain.ports.out.PasswordServicePort;
 import application.domain.ports.out.SellerRepositoryPort;
 import application.domain.ports.out.UserRepositoryPort;
 import application.domain.ports.out.WarehouseRepositoryPort;
@@ -23,9 +24,6 @@ import org.springframework.stereotype.Service;
  *
  * Section 11: identity document and email must be unique platform-wide.
  * Domain 4: the warehouse created here is of type SELLER.
- *
- * SUPUESTO: the warehouse cannot record its owning seller until Warehouse
- * references Seller in the domain model.
  */
 @Service
 public class RegisterSellerService {
@@ -33,15 +31,18 @@ public class RegisterSellerService {
     private final SellerRepositoryPort sellerRepositoryPort;
     private final UserRepositoryPort userRepositoryPort;
     private final WarehouseRepositoryPort warehouseRepositoryPort;
+    private final PasswordServicePort passwordServicePort;
     private final AuthorizeAdministratorOperationService authorizeAdministratorOperationService;
 
     public RegisterSellerService(SellerRepositoryPort sellerRepositoryPort,
                                  UserRepositoryPort userRepositoryPort,
                                  WarehouseRepositoryPort warehouseRepositoryPort,
+                                 PasswordServicePort passwordServicePort,
                                  AuthorizeAdministratorOperationService authorizeAdministratorOperationService) {
         this.sellerRepositoryPort = sellerRepositoryPort;
         this.userRepositoryPort = userRepositoryPort;
         this.warehouseRepositoryPort = warehouseRepositoryPort;
+        this.passwordServicePort = passwordServicePort;
         this.authorizeAdministratorOperationService = authorizeAdministratorOperationService;
     }
 
@@ -62,6 +63,9 @@ public class RegisterSellerService {
         if (seller.getIdentityDocument() == null || seller.getIdentityDocument().isBlank()) {
             throw new DomainException("Identity document must be provided.");
         }
+        if (seller.getPassword() == null || seller.getPassword().isBlank()) {
+            throw new DomainException("A password must be provided for the seller.");
+        }
         if (firstWarehouse.getIdentifier() == null || firstWarehouse.getIdentifier().isBlank()) {
             throw new DomainException("Warehouse identifier must be provided.");
         }
@@ -74,10 +78,12 @@ public class RegisterSellerService {
         if (warehouseRepositoryPort.existsByIdentifier(firstWarehouse)) {
             throw new DomainException("A warehouse with the same identifier already exists.");
         }
+        seller.setPassword(passwordServicePort.hash(seller.getPassword()));
         seller.setRole(UserRole.SELLER);
         seller.setStatus(UserStatus.ACTIVE);
         Seller storedSeller = sellerRepositoryPort.save(seller);
         firstWarehouse.setWarehouseType(WarehouseType.SELLER);
+        firstWarehouse.setSeller(storedSeller);
         warehouseRepositoryPort.save(firstWarehouse);
         return storedSeller;
     }

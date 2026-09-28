@@ -17,9 +17,8 @@ import java.util.Optional;
  * purchases. It is granted by the platform, so only the ADMINISTRATOR may
  * change it; the buyer never edits it through its profile.
  *
- * SUPUESTO: commercialStatus is still an open String in the domain model, so
- * this service cannot validate the value against a bounded catalog. It must
- * become a value object.
+ * The new status travels inside the Buyer domain model and is a bounded value,
+ * so no open text can reach the stored state.
  */
 @Service
 public class ChangeBuyerCommercialStatusService {
@@ -38,7 +37,7 @@ public class ChangeBuyerCommercialStatusService {
         if (buyer == null) {
             throw new EntityNotFoundException("Buyer");
         }
-        if (buyer.getCommercialStatus() == null || buyer.getCommercialStatus().isBlank()) {
+        if (buyer.getCommercialStatus() == null) {
             throw new DomainException("The new commercial status must be provided.");
         }
         Optional<Buyer> storedOptional = buyerRepositoryPort.findByIdentifier(buyer);

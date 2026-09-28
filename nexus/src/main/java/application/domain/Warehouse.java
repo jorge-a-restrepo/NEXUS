@@ -19,4 +19,9 @@ public class Warehouse {
 
     private String identifier;
     private WarehouseType warehouseType;
+    /**
+     * Seller that owns the warehouse. Domain 4 distinguishes marketplace
+     * warehouses from seller warehouses; it is null for MARKETPLACE ones.
+     */
+    private Seller seller;
 }

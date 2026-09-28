@@ -17,9 +17,6 @@ import java.util.Optional;
  *
  * The administrator and the supervisor consult every warehouse (OBJ-04,
  * OBJ-12), while a seller only reaches its own ones (RG-03).
- *
- * SUPUESTO: the restriction for sellers depends on Warehouse referencing its
- * owning Seller, which the domain model does not declare yet.
  */
 @Service
 public class ConsultWarehouseService {

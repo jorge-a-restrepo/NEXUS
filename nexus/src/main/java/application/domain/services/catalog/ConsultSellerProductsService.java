@@ -13,10 +13,6 @@ import java.util.List;
  * Retrieves the products owned by the authenticated seller, in any status.
  *
  * RG-03: a seller only sees its own products.
- *
- * SUPUESTO: the restriction depends on Product referencing its Seller. Until
- * that association exists in the domain model, the output port cannot filter
- * and the isolation required by RG-03 is not effectively enforced.
  */
 @Service
 public class ConsultSellerProductsService {

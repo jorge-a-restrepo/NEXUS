@@ -21,6 +21,14 @@ public abstract class User {
     private String identityDocument;
     private String fullName;
     private String email;
+    /**
+     * SUPUESTO: RG-01 requires every operation to be executed by an
+     * authenticated user, which implies stored credentials. The source
+     * document lists the user attributes without naming a credential, so this
+     * attribute is inferred from the authentication requirement. It stores the
+     * hashed value produced by the password output port, never the raw one.
+     */
+    private String password;
     private UserRole role;
     private UserStatus status;
 }
