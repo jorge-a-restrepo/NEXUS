@@ -26,13 +26,28 @@ nexus/src/main/java/application/
 ├── NexusApplication.java
 │
 ├── adapters/
-│   └── useCases/                     <-- Implementaciones de los puertos de entrada
-│       ├── PublicAccessUseCaseImpl.java
-│       ├── BuyerUseCaseImpl.java
-│       ├── SellerUseCaseImpl.java
-│       ├── LogisticsOperatorUseCaseImpl.java
-│       ├── AdministratorUseCaseImpl.java
-│       └── SupervisorUseCaseImpl.java
+│   ├── useCases/                     <-- Implementaciones de los puertos de entrada
+│   │   ├── PublicAccessUseCaseImpl.java
+│   │   ├── BuyerUseCaseImpl.java
+│   │   ├── SellerUseCaseImpl.java
+│   │   ├── LogisticsOperatorUseCaseImpl.java
+│   │   ├── AdministratorUseCaseImpl.java
+│   │   └── SupervisorUseCaseImpl.java
+│   ├── rest/                         <-- Adaptadores de entrada HTTP
+│   │   ├── controllers/
+│   │   ├── dtos/requests/ y dtos/responses/
+│   │   ├── mappers/
+│   │   └── exception/GlobalExceptionHandler.java
+│   ├── security/                     <-- JWT, BCrypt, filtro y reglas por rol
+│   │   ├── dtos/ y mappers/
+│   │   └── JwtProvider, JwtAuthenticationFilter, SecurityConfig, BCryptPasswordServiceAdapter
+│   └── persistence/                  <-- Adaptadores de salida
+│       ├── DomainReferences.java
+│       ├── jpa/                      <-- MySQL (entities/, mappers/, repositories/, *JpaAdapter)
+│       └── mongodb/                  <-- MongoDB (documents/, mappers/, repositories/, *MongoAdapter)
+│
+├── infrastructure/
+│   └── seed/DatabaseSeeder.java      <-- Administrador inicial
 │
 └── domain/
     ├── (modelos de dominio y value objects)
@@ -55,7 +70,7 @@ nexus/src/main/java/application/
         └── returnrefund/
 ```
 
-Las capas de persistencia (`adapters/persistence/`) y de entrega REST (`adapters/rest/`) no forman parte de esta etapa: los puertos de salida ya definen su contrato para que se implementen sin tocar el dominio.
+Las capas de entrega REST (`adapters/rest/`), seguridad (`adapters/security/`) y persistencia (`adapters/persistence/`) implementan los puertos sin modificar las reglas del dominio. Ver `SDD/Adapters/Security.md` y `SDD/Adapters/Persistence.md`. La aplicación y sus bases de datos se levantan con `docker-compose.yml` (MySQL 8, MongoDB 6 y la app).
 
 ---
 

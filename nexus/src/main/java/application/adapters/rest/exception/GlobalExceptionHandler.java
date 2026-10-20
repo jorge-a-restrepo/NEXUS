@@ -9,6 +9,7 @@ import application.domain.exceptions.UnauthorizedOperationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -64,6 +65,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleDomain(
             DomainException ex, HttpServletRequest request) {
         return body(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+
+    /**
+     * A database constraint rejected the write (for example a duplicated email or
+     * identity document that slipped past the domain check). Same meaning as a
+     * business rule violation.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+        log.warn("Database constraint violated {} {}", request.getMethod(), request.getRequestURI(), ex);
+        return body(HttpStatus.CONFLICT, "The data conflicts with information already stored.", request);
     }
 
     /** Bean Validation failures on a @Valid request body. */
