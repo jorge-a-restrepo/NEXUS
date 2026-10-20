@@ -345,6 +345,7 @@ Representa los productos que un comprador selecciona antes de realizar un pedido
 
 | Atributo | Tipo | Descripción |
 |---|---|---|
+| identificador | Cadena | Identificador único del carrito. SUPUESTO (D2): el documento fuente no lo enumera, pero el carrito cambia de estado (ACTIVO → CONVERTIDO) después de guardarse y sus ítems lo referencian, por lo que necesita identidad propia. Lo genera el sistema; nunca llega del cliente. |
 | comprador | Comprador | Comprador al que pertenece el carrito. |
 | fechaCreacion | Fecha | Fecha de creación del carrito. |
 | estado | EstadoCarrito | Estado actual del carrito. |
@@ -486,6 +487,7 @@ Clase inferida para representar el proceso de despacho y entrega de un pedido.
 
 | Atributo | Tipo | Descripción |
 |---|---|---|
+| identificador | Cadena | Identificador único del envío. SUPUESTO (D2): un pedido puede tener varios envíos y cada uno se actualiza por separado (EN_PROCESO → COMPLETADO), por lo que necesita identidad propia. Lo genera el sistema. |
 | pedido | Pedido | Pedido que se está enviando. |
 | bodegaOrigen | Bodega | Bodega desde la cual se realiza el envío. |
 | operadorLogistico | OperadorLogístico | Operador encargado del envío. |
@@ -515,6 +517,7 @@ Clase inferida para representar una devolución o reembolso relacionado con un P
 
 | Atributo | Tipo | Descripción |
 |---|---|---|
+| identificador | Cadena | Identificador único de la solicitud. SUPUESTO (D2): la solicitud se actualiza después de guardarse (SOLICITADA → APROBADA/RECHAZADA → REEMBOLSADA), por lo que necesita identidad propia. Lo genera el sistema. |
 | pedido | Pedido | Pedido relacionado con la devolución o reembolso. |
 | motivo | Cadena | Motivo de la devolución o reembolso. |
 | estado | EstadoDevolucionReembolso | Estado de la solicitud. |
