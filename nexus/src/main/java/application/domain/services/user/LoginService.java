@@ -1,18 +1,20 @@
 package application.domain.services.user;
 
+import application.domain.AuthenticationResult;
 import application.domain.User;
 import application.domain.UserStatus;
 import application.domain.exceptions.DomainException;
 import application.domain.exceptions.InvalidCredentialsException;
 import application.domain.exceptions.InvalidUserStatusException;
 import application.domain.ports.out.PasswordServicePort;
+import application.domain.ports.out.TokenServicePort;
 import application.domain.ports.out.UserRepositoryPort;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 /**
- * Authenticates a user against its stored credentials.
+ * Authenticates a user against its stored credentials and issues its access token.
  *
  * RG-01: every operation must be executed by an authenticated user, so this is
  * the entry point of every other flow. A BLOCKED user is rejected here and not
@@ -21,22 +23,25 @@ import java.util.Optional;
  * A failed lookup and a wrong password produce the same exception, so the
  * service never reveals whether an account exists.
  *
- * The access token is issued by the delivery adapter through TokenServicePort
- * using the User returned here; token technology stays outside the domain.
+ * The token is requested through TokenServicePort: the domain decides when a
+ * token is issued, while the token technology stays in the adapter layer.
  */
 @Service
 public class LoginService {
 
     private final UserRepositoryPort userRepositoryPort;
     private final PasswordServicePort passwordServicePort;
+    private final TokenServicePort tokenServicePort;
 
     public LoginService(UserRepositoryPort userRepositoryPort,
-                        PasswordServicePort passwordServicePort) {
+                        PasswordServicePort passwordServicePort,
+                        TokenServicePort tokenServicePort) {
         this.userRepositoryPort = userRepositoryPort;
         this.passwordServicePort = passwordServicePort;
+        this.tokenServicePort = tokenServicePort;
     }
 
-    public User execute(User user) {
+    public AuthenticationResult execute(User user) {
         if (user == null) {
             throw new DomainException("Credentials must be provided.");
         }
@@ -58,6 +63,7 @@ public class LoginService {
             throw new InvalidUserStatusException(
                     "User status " + stored.getStatus() + " does not allow authentication.");
         }
-        return stored;
+        String token = tokenServicePort.generateToken(stored);
+        return new AuthenticationResult(stored, token);
     }
 }

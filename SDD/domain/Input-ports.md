@@ -56,7 +56,7 @@ Operaciones accesibles sin autenticación previa.
 
 ```java
 public interface PublicAccessPort {
-    User login(User user);
+    AuthenticationResult login(User user);
     void logout(User user);
     Buyer registerBuyer(Buyer buyer);
     List<Product> consultPublicCatalog();
@@ -66,7 +66,7 @@ public interface PublicAccessPort {
 
 | Operación | Servicio | Regla |
 | :--- | :--- | :--- |
-| `login` | `LoginService` | RG-01 |
+| `login` | `LoginService` (devuelve usuario + token) | RG-01 |
 | `logout` | `LogoutService` | — |
 | `registerBuyer` | `RegisterBuyerUserService` | Sección 3.1 |
 | `consultPublicCatalog` | `ConsultCatalogService` | Dominio 5, solo `PUBLISHED` |

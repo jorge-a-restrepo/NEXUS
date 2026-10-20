@@ -281,4 +281,4 @@ User reconstructUser(String token);
 
 El token transporta la información suficiente para reconstruir el modelo de dominio `User`, que es el objeto que recibe todo puerto de entrada. La tecnología concreta del token pertenece al adaptador de entrega; el dominio solo define qué necesita de él.
 
-`LoginService` valida las credenciales y devuelve el `User`; el adaptador REST es quien emite el token a partir de ese resultado.
+`LoginService` valida las credenciales y el estado, y solicita el token a este puerto; devuelve ambos en `AuthenticationResult`. El adaptador que lo implementa es `JwtProvider` (`adapters/security/`), con JWT firmado HS256. Además de `LoginService`, el filtro `JwtAuthenticationFilter` usa `validateToken` y `reconstructUser` en cada petición.

@@ -10,9 +10,9 @@ Validación crítica que atraviesa todo el subdominio (Sección 11): **el docume
 
 ## 2. LoginService
 
-**Responsabilidad.** Autenticar a un usuario contra sus credenciales almacenadas.
+**Responsabilidad.** Autenticar a un usuario contra sus credenciales almacenadas y emitir su token de acceso.
 
-**Firma.** `User execute(User user)`
+**Firma.** `AuthenticationResult execute(User user)`
 
 **Precondiciones.** Correo y contraseña presentes en el modelo recibido.
 
@@ -23,7 +23,8 @@ Validación crítica que atraviesa todo el subdominio (Sección 11): **el docume
 2. userRepositoryPort.findByEmail(user)
 3. passwordServicePort.matches(contraseña recibida, contraseña almacenada)
 4. Validar que el estado sea ACTIVE
-5. Devolver el usuario almacenado
+5. tokenServicePort.generateToken(usuario almacenado)
+6. Devolver AuthenticationResult(usuario almacenado, token)
 ```
 
 **Validaciones y excepciones.**
@@ -41,7 +42,7 @@ Validación crítica que atraviesa todo el subdominio (Sección 11): **el docume
 
 **Regla.** RG-01. Un usuario `BLOCKED` ni siquiera obtiene sesión, de modo que el bloqueo es efectivo antes de cualquier operación.
 
-**Nota de arquitectura.** El servicio devuelve el `User` autenticado; la emisión del token la realiza el adaptador de entrega mediante `TokenServicePort`. La tecnología del token no pertenece al dominio.
+**Nota de arquitectura.** El servicio decide *cuándo* se emite un token (solo tras validar credenciales y estado) y lo solicita mediante `TokenServicePort`; la tecnología del token (JWT) vive en el adaptador `JwtProvider`. Devuelve `AuthenticationResult`, un objeto de resultado que no es entidad del negocio ni se persiste, de modo que el adaptador REST nunca invoca un puerto de salida. Decisión alineada con el proyecto de referencia del curso.
 
 ---
 
@@ -58,7 +59,7 @@ Validación crítica que atraviesa todo el subdominio (Sección 11): **el docume
 | Estado no operativo | `InvalidUserStatusException` |
 | Usuario inexistente | `EntityNotFoundException` |
 
-**Nota.** La invalidación efectiva del token corresponde al adaptador de entrega. El dominio solo confirma que la sesión pertenece a un usuario real y operativo.
+**Nota.** El cierre de sesión es *sin estado*: el cliente descarta el token y este expira por sí solo según `jwt.expiration-ms`. **SUPUESTO:** no se invalida el token en el servidor porque la especificación no define un atributo de versión de token para `User`, y agregarlo sería inventar un atributo. El dominio solo confirma que la sesión pertenece a un usuario real y operativo.
 
 ---
 

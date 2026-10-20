@@ -1,5 +1,6 @@
 package application.adapters.useCases;
 
+import application.domain.AuthenticationResult;
 import application.domain.Buyer;
 import application.domain.Product;
 import application.domain.User;
@@ -41,7 +42,7 @@ public class PublicAccessUseCaseImpl implements PublicAccessPort {
     }
 
     @Override
-    public User login(User user) {
+    public AuthenticationResult login(User user) {
         return loginService.execute(user);
     }
 

@@ -602,6 +602,10 @@ Factura, Envío y Devolución/Reembolso son clases inferidas.
 
 Se incluyen porque los procesos correspondientes aparecen dentro del alcance funcional del sistema, aunque el documento fuente no desarrolla estos dominios con el mismo nivel de detalle que usuarios, catálogo, inventario y pedidos.
 
+## Objeto de resultado de autenticación
+
+`AuthenticationResult` (atributos: `user`, `token`) no es una entidad del negocio ni se persiste. Es el valor que devuelve `LoginService` tras validar credenciales: el usuario autenticado y el token de acceso emitido mediante `TokenServicePort`. Se modela en el dominio para que el adaptador REST reciba el token sin invocar un puerto de salida. No altera el conteo de clases del modelo de negocio.
+
 # Resumen
 
 El modelo de dominio de NexusMarket está compuesto por 17 clases.
