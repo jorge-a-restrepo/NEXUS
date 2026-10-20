@@ -1,0 +1,62 @@
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: nexus-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: nexus_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_USER: nexus_app
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nexus_app_password}
+    ports:
+      - "${HOST_MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mongo-db:
+    image: mongo:6.0
+    container_name: nexus-mongo
+    restart: always
+    ports:
+      - "${HOST_MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  nexus-app:
+    build:
+      context: ./nexus
+      dockerfile: Dockerfile
+    container_name: nexus-app
+    working_dir: /workspace
+    volumes:
+      - ./nexus:/workspace
+      - maven_cache:/root/.m2
+    ports:
+      - "${HOST_SERVER_PORT:-8080}:8080"
+    environment:
+      DB_URL: "jdbc:mysql://mysql-db:3306/nexus_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      DB_USERNAME: nexus_app
+      DB_PASSWORD: ${MYSQL_PASSWORD:-nexus_app_password}
+      MONGODB_URI: mongodb://mongo-db:27017/nexus_audit_db
+      SERVER_PORT: 8080
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      mongo-db:
+        condition: service_healthy
+    command: ["mvn", "-B", "spring-boot:run"]
+
+volumes:
+  mysql_data:
+  mongo_data:
+  maven_cache:
